@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>suggest</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="../../asset/css/base.css">
+    <link rel="stylesheet" href="suggest.css">
+    <style>
+        .i-search{
+            margin:  5px;
+
+        }
+        .i-search form{
+            height: 40px;
+            border:1px solid #00be3c;
+            position: relative;
+        }
+        .i-search #q {
+            width: 100%;
+            height: 100%;
+            padding: 0 6px;
+        }
+        .i-search button[type="submit"]{
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 47px;
+            height: 100%;
+            background:#00be3c url(http://p8.qhimg.com/t019bc4cc2d48047e5f.png) no-repeat 50%;
+            background-size: 20px 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="i-search">
+        <form action="http://m.haosou.com/s">
+            <input type="text" id="q" name="q">
+            <button type="submit"></button>
+        </form>
+    </div>
+    <script src="../../bower_components/requirejs/require.js"></script>
+    <script src="../../bower_components/zepto/zepto.js"></script>
+    <script>
+        require(['suggest'], function (Suggest) {
+            var sug = new Suggest({
+                input: '#q',
+                wrap : '.i-search',
+                api : 'http://m.haosou.com/suggest/mso?kw=%s&callback=?',
+                formatData:function(data) {
+                    var ret = {
+                        query : data.data.query,
+                        data : data.data.sug || []
+                    }
+                    $.each(ret.data, function(i, o) {
+                        o.kw = o.word;
+                    });
+                    return ret;
+                }
+            });
+        })
+    </script>
+</body>
+</html>
