@@ -40,14 +40,14 @@
         itemTpl       : '',
         /**
          * formatData 处理数据源成sug内容约定的格式
-         * @param  {object} query [传入的对象]
-         * @return {
-         *    query : 'query',
-         *    data : []
+         * @param  {object} data [传入的对象]
+         * @callback {
+         *    query : 'query', default : ''
+         *    data : []  default: []
          * }
          */
-        formatData: function (query){
-            return query;
+        formatData: function (data, next){
+            next(data);
         }
     };
 
@@ -63,11 +63,10 @@
             $wrap         : NULL, // 父容器，position应为relative
             $input        : NULL, // 事件文本框
             $form         : NULL,
-            $container    : NULL, // 下拉框容器
-            $content      : NULL, // 保存suggest Dom结构
+            $content      : NULL,
             $clearHistory : NULL,
             $close        : NULL,
-            $classel      : NULL
+            $classel      : NULL,
         },
         init : function(params){
             var suggest = this;
@@ -87,8 +86,6 @@
             elements.$input.attr('autocomplete', 'off');
 
             suggest._bindEvnet();
-            // elements.$container = $wrap.find('.suggest-content');
-            // elements.$container = $wrap.find('.suggest-content');
         },
         on: function(event, selector, callback) {
             var suggest = this;
@@ -147,14 +144,16 @@
                     url : suggest.cfg.api.replace('%s', encode(query)),
                     // jsonpCallback: 'Suggest' + gid,
                     success: function(result){
-                        result = suggest.cfg.formatData(result);
-                        // TODO: 高亮query
-                        // result = result.forEach(function(){
-                        //     var kw =  String(sugData.query).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
-                        //     return string.replace(new RegExp('(' + kw + ')', 'i') , '<strong>$1</strong>');
-                        // });
-                        callback(result);
-                        suggest._cache.queries[query] = result;
+                        suggest.cfg.formatData(result, function(formatedResult){
+                            // TODO: 高亮query
+                            // result = result.forEach(function(){
+                            //     var kw =  String(sugData.query).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
+                            //     return string.replace(new RegExp('(' + kw + ')', 'i') , '<strong>$1</strong>');
+                            // });
+                            callback(formatedResult);
+                            suggest._cache.queries[query] = formatedResult;
+                        });
+
                     }
                 });
                 // $.getJSON(suggest.cfg.api.replace('%s', encode(query)), function(result){

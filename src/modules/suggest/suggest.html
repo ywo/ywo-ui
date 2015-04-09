@@ -38,6 +38,7 @@
     <div class="i-search">
         <form action="http://m.haosou.com/s">
             <input type="text" id="q" name="q">
+            <input type="hidden" name="src" value="demo">
             <button type="submit"></button>
         </form>
     </div>
@@ -48,8 +49,8 @@
             var sug = new Suggest({
                 input: '#q',
                 wrap : '.i-search',
-                api : 'http://m.haosou.com/suggest/mso?kw=%s&callback=?',
-                formatData:function(data) {
+                api : 'http://m.haosou.com/suggest/mso?kw=%s&src=demo&callback=?',
+                formatData:function(data, next) {
                     var ret = {
                         query : data.data.query,
                         data : data.data.sug || []
@@ -57,7 +58,7 @@
                     $.each(ret.data, function(i, o) {
                         o.kw = o.word;
                     });
-                    return ret;
+                    next(ret);
                 }
             });
         })
