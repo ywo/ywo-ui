@@ -11,17 +11,17 @@
     var tmpl = (function () {
         var cache = {};
         return function tpl(str, data) {
-            str = str || '<#=""#>';
             var fn = !/\W/.test(str) ?
                 cache[str] = cache[str] :
-            new Function ("obj",
-            "var p=[],print=function(){p.push.apply(p,arguments);};" +
+            new Function ('obj',
+            'var p=[],print=function(){p.push.apply(p,arguments);};' +
             "with(obj){p.push('" +
             str
                 .replace(/[\r\t\n]/g, " ")
                 .split("<#").join("\t")
                 .replace(/((^|#>)[^\t]*)'/g, "$1\r")
-                .replace(/\t=(.*?)#>/g, "',$1,'")
+                .replace(/\t-(.*?)#>/g, "',$1,'")
+                .replace(/\t=(.*?)#>/g, "',$1.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;').replace(/\\s/g,' '),'")
                 .split("\t").join("');")
                 .split("#>").join("p.push('")
                 .split("\r").join("\\'")
@@ -29,15 +29,6 @@
             return data ? fn(data) : fn;
         };
     })();
-    var  htmlEscape = function(s){
-        if (s == null) return s;
-        return s.replace(/&/g, '&amp;')
-            .replace(/</g,  '&lt;')
-            .replace(/>/g,  '&gt;')
-            .replace(/"/g,  '&quot;')
-            .replace(/'/g,  '&#39;')
-            .replace(/\s/g,  ' ');
-    };
 
     var gid = 0;
     var defaults  = {
@@ -202,12 +193,12 @@
                     $.each(result.data.slice(0, suggest.cfg.suggestNumber), function(i, o){
                         html.push(tmpl(itemTpl, {
                             item : o,
-                            query : htmlEscape(suggest.query)
+                            query : suggest.query
                         }));
                     });
                 } else {
                     html.push(tmpl(suggest.cfg.emptyTpl, {
-                        query: htmlEscape(suggest.query)
+                        query: suggest.query
                     }));
                 }
 
