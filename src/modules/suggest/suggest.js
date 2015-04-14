@@ -29,6 +29,15 @@
             return data ? fn(data) : fn;
         };
     })();
+    var  htmlEscape = function(s){
+        if (s == null) return s;
+        return s.replace(/&/g, '&amp;')
+            .replace(/</g,  '&lt;')
+            .replace(/>/g,  '&gt;')
+            .replace(/"/g,  '&quot;')
+            .replace(/'/g,  '&#39;')
+            .replace(/\s/g,  ' ');
+    };
 
     var gid = 0;
     var defaults  = {
@@ -38,17 +47,21 @@
         suggestNumber : 6,
         api           : '',
         itemTpl       : '',
+        emptyTpl      : '<#=query#>未找到',
         /**
-         * formatData 处理数据源成sug内容约定的格式
+         *
+          处理数据源成sug内容约定的格式
          * @param  {object} data [传入的对象]
          * @callback {
          *    query : 'query', default : ''
          *    data : []  default: []
          * }
          */
+
         formatData: function (data, next){
             next(data);
-        }
+        },
+        onempty : NOOP
     };
 
     function Suggest(params) {
@@ -84,6 +97,7 @@
             elements.$content = elements.$wrap.find('.suggest-content');
             elements.$wrap.css('position', 'relative');
             elements.$input.attr('autocomplete', 'off');
+            suggest.query =  elements.$input.val();
 
             suggest._bindEvnet();
         },
@@ -150,8 +164,13 @@
                             //     var kw =  String(sugData.query).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
                             //     return string.replace(new RegExp('(' + kw + ')', 'i') , '<strong>$1</strong>');
                             // });
+                            // formatedResult = {query: '', data:[]}
+
                             callback(formatedResult);
                             suggest._cache.queries[query] = formatedResult;
+                            if(!formatedResult.data.length) {
+                                suggest.cfg.onempty.call(suggest);
+                            }
                         });
 
                     }
@@ -169,17 +188,31 @@
                 $content = elements.$content,
                 $input = elements.$input;
             var query = $.trim($input.val());
+            if(query && query === suggest.query) {
+                return;
+            } else {
+                suggest.query = query;
+            }
+
             $classel[query ? 'removeClass' : 'addClass'](suggest.cfg.emptyCls);
             suggest._getData(query, function(result){
                 if($.trim($input.val()) !== result.query) {return;}
-
                 var html = [];
-                $.each(result.data.slice(0, suggest.cfg.suggestNumber), function(i, o){
-                    html.push(tmpl(itemTpl, o));
-                });
+                if(result.data.length) {
+                    $.each(result.data.slice(0, suggest.cfg.suggestNumber), function(i, o){
+                        html.push(tmpl(itemTpl, {
+                            item : o,
+                            query : htmlEscape(suggest.query)
+                        }));
+                    });
+                } else {
+                    html.push(tmpl(suggest.cfg.emptyTpl, {
+                        query: htmlEscape(suggest.query)
+                    }));
+                }
 
                 html = html.join('');
-                if(html && $.trim($input.val()) === result.query){
+                if(html){
                     $content.html(html);
                     suggest.show();
                 } else {
@@ -205,9 +238,9 @@
                         '<button class="suggest-close">关闭</button>' +
                     '</div>' +
                 '</div>',
-            itemTpl       :
-                '<div class="suggest-item" data-kw=<#=kw#>>' +
-                    '<button class="suggest-item-title"><#=kw#></button>' +
+            itemTpl :
+                '<div class="suggest-item" data-kw=<#=item.kw#>>' +
+                    '<button class="suggest-item-title"><#=item.kw#></button>' +
                     '<button class="suggest-item-add"></button>' +
                 '</div>',
         }

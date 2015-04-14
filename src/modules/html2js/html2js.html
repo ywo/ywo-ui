@@ -5,34 +5,62 @@
     <title></title>
 </head>
 <body>
-<textarea name="input" id="input" cols="80" rows="10">
-
-</textarea>
+<textarea name="input" id="input" cols="80" rows="10"></textarea>
 <label><input type="checkbox" id="js"> javascript前缀</label>
+<label><input type="checkbox" id="base64">base64</label>
+<label><input type="checkbox" id="app">app</label>
 <button id="btn">生成</button>
 <textarea name="output" id="output" cols="80" rows="10" onfocus="this.select()"></textarea>
 <script>
     (function(){
-      var input = document.getElementById('input');
-      var output = document.getElementById('output');
-      var js = document.getElementById('js');
-      var btn = document.getElementById('btn');
-      btn.onclick = function (argument) {
-          var text = input.value;
-          text = text.trim()
-                 .replace(/[\r\n\t]/g, '')
-                 .replace(/\s+/g, ' ')
-                 .replace(/\\/g, '\\\\')
-                 .replace(/'/g, '\\x27')
-                 .replace(/"/g, '\\x22')
-                 .replace(/\//g, '\\/')
-                 .replace(/\n/g, '\\n')
-                 .replace(/\r/g, '\\r')
-                 .replace(/\t/g, '\\t')
+        var input = document.getElementById('input');
+        var output = document.getElementById('output');
+        var js = document.getElementById('js');
+        var base64 = document.getElementById('base64');
+        var app = document.getElementById('app');
+        var btn = document.getElementById('btn');
 
-          text = 'document.write(\'' + text + '\')';
-          output.value = text;
-      }
+        try{
+            input.value = localStorage.input || ''
+        }catch(e){}
+        input.onblur = function(){
+            try{
+                localStorage.input = input.value || '';
+            }catch(e){}
+        }
+
+        btn.onclick = function () {
+            var text = input.value;
+            text = text.trim()
+                   .replace(/[\r\n\t]/g, ' ')
+                   .replace(/\s+/g, ' ')
+                   .replace(/\\/g, '\\\\')
+                   .replace(/'/g, '\\x27')
+                   .replace(/"/g, '\\x22')
+                   .replace(/\//g, '\\/')
+                   .replace(/\n/g, '\\n')
+                   .replace(/\r/g, '\\r')
+                   .replace(/\t/g, '\\t')
+            if(js.checked) {
+                text = 'javascript:' + 'document.write(\'' + text + '\')';
+            } else if(app.checked) {
+              text =(
+                '(function(){' +
+                    'var __="night";' +
+                    'var __header = document.getElementById(\'__header_mso_app\');' +
+                    'var write = function(str){document.documentElement ? document.documentElement.innerHTML=str : document.write(str)};' +
+                    '__header && __header.parentNode.removeChild(__header);' +
+                    'write(\'' +
+                      text.replace('%class', '\' +__+ \'') +
+                    '\')' +
+                    ';try{mso_android_errorpage.maskDismiss()}catch(ex){}' +
+                '})();'
+                );
+            } else {
+                text = 'document.write(\'' + text + '\')';
+            }
+            output.value = text;
+        }
   })();
 </script>
 </body>

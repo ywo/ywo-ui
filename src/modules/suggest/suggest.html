@@ -59,6 +59,9 @@
                         o.kw = o.word;
                     });
                     next(ret);
+                },
+                onempty: function() {
+                    console.log(this.query)
                 }
             });
         })
