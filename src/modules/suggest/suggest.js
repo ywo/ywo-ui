@@ -142,13 +142,16 @@
             var suggest = this;
             var cacheData = suggest._cache.queries[query];
             if(cacheData) {
-                callback(cacheData);
+                suggest.cfg.formatData(cacheData, function(formatedResult){
+                    callback(formatedResult);
+                })
             } else {
                 $.ajax({
                     cache: true,
                     url : suggest.cfg.api.replace('%s', encode(query)),
                     // jsonpCallback: 'Suggest' + gid,
                     success: function(result){
+                        suggest._cache.queries[query] = result;
                         suggest.cfg.formatData(result, function(formatedResult){
                             // TODO: 高亮query
                             // result = result.forEach(function(){
@@ -158,7 +161,6 @@
                             // formatedResult = {query: '', data:[]}
 
                             callback(formatedResult);
-                            suggest._cache.queries[query] = formatedResult;
                             if(!formatedResult.data.length) {
                                 suggest.cfg.onempty.call(suggest);
                             }

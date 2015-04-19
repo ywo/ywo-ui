@@ -51,6 +51,7 @@
                 wrap : '.i-search',
                 api : 'http://m.haosou.com/suggest/mso?kw=%s&src=demo&callback=?',
                 formatData:function(data, next) {
+                    // console.log(1);
                     var ret = {
                         query : data.data.query,
                         data : data.data.sug || []

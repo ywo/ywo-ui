@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>action</title>
+    <style>
+        div {
+            border : 1px solid #666;
+            padding: 20px;
+        }
+        div:hover{
+            border:1px solid #f00;
+        }
+    </style>
+    <script src="../../bower_components/zepto/zepto.js"></script>
+</head>
+<body>
+    <div ac-click="say,a">
+        a
+        <div ac-click="dog.say, wang~">
+            dog
+            <div ac-click="bird.say, twitee~">
+                bird
+                <div ac-click="cat.say, miao~">
+                    cat
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./action.js"></script>
+    <script>
+    action.add({
+        cat : {
+            say : function(msg, e) {
+                console.log('"cat.say" : ', msg);
+            }
+        },
+        dog : {
+            say : function (msg, e){
+                console.log('"dog.say" : ', msg);
+            }
+        },
+        say : function(msg) {
+            console.log(this)
+        }
+    }).listen().add({
+        bird : {
+            say : function(msg) {
+                console.log('"bird.say" : ', msg);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
